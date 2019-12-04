@@ -17,7 +17,7 @@ y = tf.one_hot(y, depth=10)  # one-hot 编码
 print(x.shape, y.shape)
 
 train_dataset = tf.data.Dataset.from_tensor_slices((x, y))
-train_dataset = train_dataset.batch(500)
+train_dataset = train_dataset.batch(100)
 
 model = keras.Sequential([
     layers.Dense(512, activation='relu'),
