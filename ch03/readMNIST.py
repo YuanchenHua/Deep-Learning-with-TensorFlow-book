@@ -1,73 +1,72 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 """
-´ÓMNISTÖĞ¶ÁÈ¡Ô­Ê¼Í¼Æ¬²¢±£´æ¡¢¶ÁÈ¡±êÇ©Êı¾İ²¢±£´æ¡£
-MNISTÎÄ¼ş½á¹¹·ÖÎö¿ÉÒÔ²Î¿¼£ºhttps://blog.csdn.net/justidle/article/details/103149253
+ä»MNISTä¸­è¯»å–åŸå§‹å›¾ç‰‡å¹¶ä¿å­˜ã€è¯»å–æ ‡ç­¾æ•°æ®å¹¶ä¿å­˜ã€‚
+MNISTæ–‡ä»¶ç»“æ„åˆ†æå¯ä»¥å‚è€ƒï¼šhttps://blog.csdn.net/justidle/article/details/103149253
 """
 """
-Ê¹ÓÃ·½·¨£º
-1¡¢½«MNISTµÄÎÄ¼şÏÂÔØµ½±¾µØ¡£
-2¡¢ÔÚpyÎÄ¼şËùÔÚÄ¿Â¼ÏÂ£¬½¨Á¢mnist_dataÄ¿Â¼¡£È»ºó½«MNISTµÄËÄ¸öÎÄ¼ş¿½±´µ½mnist_dataÄ¿Â¼£¬²¢½âÑ¹
-3¡¢ÔÚpyÎÄ¼şËùÔÚÄ¿Â¼ÏÂ£¬½¨Á¢testÄ¿Â¼£¬¸ÄÄ¿Â¼ÓÃÓÚ´æ·Å½âÑ¹³öµÄÍ¼Æ¬ÎÄ¼şºÍ±êÇ©ÎÄ¼ş
+ä½¿ç”¨æ–¹æ³•ï¼š
+1ã€å°†MNISTçš„æ–‡ä»¶ä¸‹è½½åˆ°æœ¬åœ°ã€‚
+2ã€åœ¨pyæ–‡ä»¶æ‰€åœ¨ç›®å½•ä¸‹ï¼Œå»ºç«‹mnist_dataç›®å½•ã€‚ç„¶åå°†MNISTçš„å››ä¸ªæ–‡ä»¶æ‹·è´åˆ°mnist_dataç›®å½•ï¼Œå¹¶è§£å‹
+3ã€åœ¨pyæ–‡ä»¶æ‰€åœ¨ç›®å½•ä¸‹ï¼Œå»ºç«‹testç›®å½•ï¼Œæ”¹ç›®å½•ç”¨äºå­˜æ”¾è§£å‹å‡ºçš„å›¾ç‰‡æ–‡ä»¶å’Œæ ‡ç­¾æ–‡ä»¶
 """
 
 import struct
 import numpy as np
 import PIL.Image
-    
+
+
 def read_image(filename):
-    #´ò¿ªÎÄ¼ş
+    # æ‰“å¼€æ–‡ä»¶
     f = open(filename, 'rb')
-    
-    #¶ÁÈ¡ÎÄ¼şÄÚÈİ
+
+    # è¯»å–æ–‡ä»¶å†…å®¹
     index = 0
     buf = f.read()
-    
-    #¹Ø±ÕÎÄ¼ş
+
+    # å…³é—­æ–‡ä»¶
     f.close()
-    
-    #½âÎöÎÄ¼şÄÚÈİ
-    #>IIII ±íÊ¾Ê¹ÓÃ´ó¶Ë¹æÔò£¬¶ÁÈ¡ËÄ¸öÕûĞÍ
+
+    # è§£ææ–‡ä»¶å†…å®¹
+    # >IIII è¡¨ç¤ºä½¿ç”¨å¤§ç«¯è§„åˆ™ï¼Œè¯»å–å››ä¸ªæ•´å‹
     magic, numImages, rows, columns = struct.unpack_from('>IIII', buf, index)
     index += struct.calcsize('>IIII')
-    
+
     for i in range(0, numImages):
-        # L´ú±í»Ò¶ÈÍ¼Æ¬
+        # Lä»£è¡¨ç°åº¦å›¾ç‰‡
         image = PIL.Image.new('L', (columns, rows))
-        
+
         for x in range(rows):
             for y in range(columns):
-                # ¡®>B' ¶ÁÈ¡Ò»¸ö×Ö½Ú
-                image.putpixel((y,x), int(struct.unpack_from('>B', buf, index)[0]))
+                # â€˜>B' è¯»å–ä¸€ä¸ªå­—èŠ‚
+                image.putpixel((y, x), int(struct.unpack_from('>B', buf, index)[0]))
                 index += struct.calcsize('>B')
-                
+
         print('save ' + str(i) + 'image')
-        image.save('mnist_data/test/'+str(i)+'.png')
-        
+        image.save('mnist_data/test/' + str(i) + '.png')
+
+
 def read_label(filename, saveFilename):
     f = open(filename, 'rb')
     index = 0
     buf = f.read()
     f.close()
-    
-    magic, labels = struct.unpack_from('>II' , buf , index)
+
+    magic, labels = struct.unpack_from('>II', buf, index)
     index += struct.calcsize('>II')
-    
+
     labelArr = [0] * labels
-    
+
     for x in range(labels):
         labelArr[x] = int(struct.unpack_from('>B', buf, index)[0])
         index += struct.calcsize('>B')
-    
+
     save = open(saveFilename, 'w')
     save.write(','.join(map(lambda x: str(x), labelArr)))
     save.write('\n')
     save.close()
     print('save labels success')
 
+
 if __name__ == '__main__':
-    #×¢Òât10k-images-idx3-ubyteÀïÃæÒ»¹²ÓĞ10,000ÕÅÍ¼Æ¬
+    # æ³¨æ„t10k-images-idx3-ubyteé‡Œé¢ä¸€å…±æœ‰10,000å¼ å›¾ç‰‡
     read_image('mnist_data/t10k-images-idx3-ubyte')
     read_label('mnist_data/t10k-labels-idx1-ubyte', 'mnist_data/test/label.txt')
-    
