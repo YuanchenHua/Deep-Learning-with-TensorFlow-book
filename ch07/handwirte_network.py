@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.datasets import make_moons
 from sklearn.model_selection import train_test_split
 
+LEARNING_RATE = 0.01
 N_SAMPLES = 2000  # 采样点数
 TEST_SIZE = 0.3  # 测试数量比率
 # 利用工具函数直接生成数据集
@@ -156,4 +157,5 @@ nn.add_layer(Layer(2, 25, 'sigmoid'))  # 隐藏层 1, 2=>25
 nn.add_layer(Layer(25, 50, 'sigmoid'))  # 隐藏层 2, 25=>50
 nn.add_layer(Layer(50, 25, 'sigmoid'))  # 隐藏层 3, 50=>25
 nn.add_layer(Layer(25, 2, 'sigmoid'))  # 输出层, 25=>2
-nn.train(x_train, x_test, y_train, y_test, 0.01, 200)
+# 训练200个Epoch
+nn.train(x_train, x_test, y_train, y_test, LEARNING_RATE, 200)
