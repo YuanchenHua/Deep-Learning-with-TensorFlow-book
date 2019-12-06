@@ -11,7 +11,7 @@ resnet.summary()
 x = tf.random.normal([4,224,224,3])
 out = resnet(x)
 out.shape
-#%%
+
 # 新建池化层
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
 # 利用上一层的输出作为本层的输入，测试其输出
