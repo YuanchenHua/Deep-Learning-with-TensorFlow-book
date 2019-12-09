@@ -58,7 +58,13 @@ out.shape
 layer.kernel,layer.bias
 # 返回所有待优化张量列表
 layer.trainable_variables
-
+# %%
+(x,y),(x_test, y_test) = tf.keras.datasets.mnist.load_data()
+x = tf.cast(x,dtype = tf.float32)
+x_test = tf.cast(x_test,dtype = tf.float32)
+db_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+db_test = db_test.batch(200)
+db_test
 # %%
 from tensorflow.keras import Sequential
 network = Sequential([ # 网络容器
@@ -85,11 +91,13 @@ network.summary()
 from tensorflow.keras import losses, optimizers
 # 创建损失函数的类，在实际计算时直接调用类实例即可
 criteon = losses.CategoricalCrossentropy(from_logits=True)
+optimizer = optimizers.Adam()
 
 # %%
     # 构建梯度记录环境
     with tf.GradientTape() as tape: 
         # 插入通道维度，=>[b,28,28,1]
+        print(x.shape)
         x = tf.expand_dims(x,axis=3)
         # 前向计算，获得10类别的预测分布，[b, 784] => [b, 10]
         out = network(x)
@@ -106,9 +114,10 @@ criteon = losses.CategoricalCrossentropy(from_logits=True)
 # %%
         # 记录预测正确的数量，总样本数量
         correct, total = 0,0
-        for x,y in db_test: # 遍历所有训练集样本
+        for x,y in zip(x_test,y_test): # 遍历所有训练集样本
             # 插入通道维度，=>[b,28,28,1]
-            x = tf.expand_dims(x,axis=3)
+            x = tf.expand_dims(x,axis=2)
+            x = tf.expand_dims(x, axis=0)
             # 前向计算，获得10类别的预测分布，[b, 784] => [b, 10]
             out = network(x)
             # 真实的流程时先经过softmax，再argmax
