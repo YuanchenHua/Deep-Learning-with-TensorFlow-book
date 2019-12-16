@@ -1,4 +1,5 @@
 import tensorflow.compat.v1 as tf
+# 关闭2.0版本，开启1.0版本
 tf.disable_v2_behavior()
 assert tf.__version__.startswith('2.')
 
