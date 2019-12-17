@@ -6,6 +6,7 @@ import tensorflow as tf
 batch_size = 200
 # 别忘记除到 0～1范围
 x_train = x_train/255.0
+# 这一步涵盖着 把数据转换成tensor！！！！
 # 这个函数是 tf.data.Dataset.from_tensor_slices 且只接受一个参数，所以要括号圈起来
 db = tf.data.Dataset.from_tensor_slices((x_train,y_train))
 db = db.batch(batch_size).repeat(10)
