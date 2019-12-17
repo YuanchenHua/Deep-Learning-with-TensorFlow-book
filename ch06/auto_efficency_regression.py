@@ -32,8 +32,6 @@ dataset = raw_dataset.copy()
 dataset.tail()
 dataset.head()
 dataset
-#%%
-
 
 #%%
 
@@ -89,12 +87,13 @@ print(normed_test_data.shape, test_labels.shape)
 class Network(keras.Model):
     # 回归网络
     def __init__(self):
+        # 调用父类 __init__()方法
         super(Network, self).__init__()
         # 创建3个全连接层
         self.fc1 = layers.Dense(64, activation='relu')
         self.fc2 = layers.Dense(64, activation='relu')
         self.fc3 = layers.Dense(1)
-
+    # 重写call方法,参数为input
     def call(self, inputs, training=None, mask=None):
         # 依次通过3个全连接层
         x = self.fc1(inputs)
@@ -102,13 +101,18 @@ class Network(keras.Model):
         x = self.fc3(x)
 
         return x
-
+# 搭建网络,即新建一个Model类的实例
 model = Network()
+# build一下,输入input_shape()
 model.build(input_shape=(None, 9))
 model.summary()
+# 指定优化器
 optimizer = tf.keras.optimizers.RMSprop(0.001)
+# 处理数据
+# tf.data.Dataset.from_tensor_slices(())
 train_db = tf.data.Dataset.from_tensor_slices((normed_train_data.values, train_labels.values))
-train_db = train_db.shuffle(100).batch(32)
+# shuffle一下,batch一下
+train_db = train_db.shuffle(100).batch(512)
 
 # # 未训练时测试
 # example_batch = normed_train_data[:10]
@@ -123,7 +127,9 @@ for epoch in range(200):
 
         with tf.GradientTape() as tape:
             out = model(x)
+            # mse_lose 均方差 Mean Square Error
             loss = tf.reduce_mean(losses.MSE(y, out))
+            # mae_lose 平均绝对误差,Mean Absolute Error
             mae_loss = tf.reduce_mean(losses.MAE(y, out)) 
 
         if step % 10 == 0:
@@ -133,7 +139,9 @@ for epoch in range(200):
         optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
     train_mae_losses.append(float(mae_loss))
+    # 把test的x带入计算out出来
     out = model(tf.constant(normed_test_data.values))
+    # 在用这个out,统计MAE
     test_mae_losses.append(tf.reduce_mean(losses.MAE(test_labels, out)))
 
 
@@ -149,7 +157,6 @@ plt.legend()
 plt.legend()
 plt.savefig('auto.svg')
 plt.show() 
-
 
 
 
