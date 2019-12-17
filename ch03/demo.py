@@ -22,18 +22,27 @@ xs = tf.convert_to_tensor(xs, dtype=tf.float32) / 255.
 db = tf.data.Dataset.from_tensor_slices((xs, ys))
 print(db)
 #%%
-batch_size = 150
-db = db.batch(batch_size)
+batch_size = 200
+''' 
+batch 就是分成多少组并行运算
+这里一共60 000 数据，batch(200)，就是分成每组200个，一共是300组
+db中的[x,y]，x的shape就变成了(200,28,28)
+db就是300个(200,28,28)
+后面再加个 .repeat(30)，就相当于做 30个epochs，即对60 000个数据，进行30轮
+'''
+db = db.batch(batch_size)#.repeat(30)
 print(db)
 #%%
 
 model = Sequential([layers.Dense(256, activation='relu'),
                     layers.Dense(128, activation='relu'),
                     layers.Dense(10)])
-model.build(input_shape=(4, 28 * 28))
+# 这里的input_shape 第一个 8，没有什么用，只是为了把model build起来
+model.build(input_shape=(8, 28 * 28))
+model.summary()
 optimizer = optimizers.SGD(lr=0.01)
 acc_meter = metrics.Accuracy()
-model.summary()
+
 
 #%%
 
@@ -42,6 +51,7 @@ for step, (x, y) in enumerate(db):
     with tf.GradientTape() as tape:
         # 打平操作，[b, 28, 28] => [b, 784]
         x = tf.reshape(x, (-1, 28 * 28))
+        print(x.shape)
         # Step1. 得到模型输出output [b, 784] => [b, 10]
         out = model(x)
         # [b] => [b, 10]
@@ -56,6 +66,6 @@ for step, (x, y) in enumerate(db):
     grads = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
-    if step % 200 == 0:
+    if step % 1 == 0:
         print(step, 'loss:', float(loss), 'acc:', acc_meter.result().numpy())
         acc_meter.reset_states()
