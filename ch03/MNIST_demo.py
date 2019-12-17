@@ -17,7 +17,8 @@ if gpus:
 (xs, ys), _ = datasets.mnist.load_data()
 print('datasets:', xs.shape, ys.shape, xs.min(), xs.max())
 #%%
-
+# 把数据转换成tensor！！！tf.convert_to_tensor
+# 转换到0～1范围！！！
 xs = tf.convert_to_tensor(xs, dtype=tf.float32) / 255.
 db = tf.data.Dataset.from_tensor_slices((xs, ys))
 print(db)
