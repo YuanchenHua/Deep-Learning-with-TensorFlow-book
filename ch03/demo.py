@@ -1,3 +1,4 @@
+#%%
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, optimizers, Sequential, metrics
 
@@ -15,21 +16,26 @@ if gpus:
 
 (xs, ys), _ = datasets.mnist.load_data()
 print('datasets:', xs.shape, ys.shape, xs.min(), xs.max())
-
-batch_size = 32
+#%%
 
 xs = tf.convert_to_tensor(xs, dtype=tf.float32) / 255.
 db = tf.data.Dataset.from_tensor_slices((xs, ys))
-db = db.batch(batch_size).repeat(30)
+print(db)
+#%%
+batch_size = 150
+db = db.batch(batch_size)
+print(db)
+#%%
 
 model = Sequential([layers.Dense(256, activation='relu'),
                     layers.Dense(128, activation='relu'),
                     layers.Dense(10)])
 model.build(input_shape=(4, 28 * 28))
-model.summary()
-
 optimizer = optimizers.SGD(lr=0.01)
 acc_meter = metrics.Accuracy()
+model.summary()
+
+#%%
 
 for step, (x, y) in enumerate(db):
 
