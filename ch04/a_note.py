@@ -3,16 +3,19 @@ import numpy as np
 # 载入数据
 (x_train, y_train), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 # 建立tf.Variable
-w1 = tf.Variable(tf.random.truncated_normal([784, 256], stddev=0.1))
+w1 = tf.Variable(tf.random.truncated_normal([28*28, 256], stddev=0.1))
 b1 = tf.Variable(tf.zeros(256))
 w2 = tf.Variable(tf.random.truncated_normal([256, 128], stddev=0.1))
 b2 = tf.Variable(tf.zeros(128))
 w3 = tf.Variable(tf.random.truncated_normal([128, 10], stddev=0.1))
 b3 = tf.Variable(tf.zeros(10))
 
-# 一定要转浮点，不知道为毛！！！
+# 一定要转浮点!
 # 一定要除以255，归结到0-1范围，不然计算误差是，会出现无限接近0，从而没法优化
-x_train = tf.cast(x_train,tf.float32)/255
+# tf.cast()函数中，也包含转为tensor
+# x_train = tf.cast(x_train,tf.float32)/255
+# 要转换成tensor！！！
+x_train = tf.convert_to_tensor(x_train,dtype=tf.float32)/255.0
 # 为了方便，只拿1000个数据训练把
 x_train = x_train[0:1000,...]
 y_train = y_train[0:1000,...]
@@ -27,7 +30,7 @@ def train_epoch(epoch, lr):
         with tf.GradientTape() as tape:
 
 
-            h1 = tf.matmul(x,w1) + tf.broadcast_to(b1, [x.shape[0], 256])
+            h1 = x@w1 + b1
             h1 = tf.nn.relu(h1)
 
             h2 = h1 @ w2 + b2
