@@ -32,10 +32,11 @@ dataset = raw_dataset.copy()
 # 查看部分数据
 dataset.tail()
 dataset.head()
+# 类型是pandas DataFrame
 dataset
 
 # %%
-
+print(type(dataset))
 # 统计空白数据,并清除
 dataset.isna().sum()
 dataset = dataset.dropna()
@@ -116,7 +117,7 @@ model.summary()
 optimizer = tf.keras.optimizers.RMSprop(0.001)
 
 # %%
-# 处理数据
+# 处理数据,把pandas的转换成tensor
 # tf.data.Dataset.from_tensor_slices(())
 train_db = tf.data.Dataset.from_tensor_slices(
     (normed_train_data.values, train_labels.values))
