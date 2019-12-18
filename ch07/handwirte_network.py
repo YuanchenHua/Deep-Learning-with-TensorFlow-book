@@ -1,3 +1,4 @@
+# %%
 import numpy as np
 from sklearn.datasets import make_moons
 from sklearn.model_selection import train_test_split
@@ -10,24 +11,17 @@ x, y = make_moons(n_samples=N_SAMPLES, noise=0.2, random_state=100)
 # 将 2000 个点按着 7:3 分割为训练集和测试集
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SIZE, random_state=42)
 print(x.shape, y.shape)
-
+# %%
 
 class Layer:
     def __init__(self, n_input, n_neurons, activation=None, weights=None,
                  bias=None):
-        """
-        :param int n_input: 输入节点数
-        :param int n_neurons: 输出节点数
-        :param str activation: 激活函数类型
-        :param weights: 权值张量，默认类内部生成
-        :param bias: 偏置，默认类内部生成
-        """
         # 通过正态分布初始化网络权值，初始化非常重要，不合适的初始化将导致网络不收敛
         self.weights = weights if weights is not None else np.random.randn(n_input, n_neurons) * np.sqrt(1 / n_neurons)
         self.bias = bias if bias is not None else np.random.rand(n_neurons) * 0.1
         self.activation = activation  # 激活函数类型，如’sigmoid’
         self.after_activation = None  # 激活函数的输出值 o
-        self.error = None  # 用于计算当前层的 delta 变量的中间变量
+        self.error = None  # 用于计算当前层的 delta 变量的中间变量,就是公式中的后半部分!!!!!
         self.delta = None  # 记录当前层的 delta 变量，用于计算梯度
 
     def forward(self, x):
@@ -98,7 +92,7 @@ class NeuralNetwork:
 
     def backpropagation(self, X, y, learning_rate):
         # 反向传播算法实现
-        # 前向计算，得到输出值
+        # 前向计算，其实就为了让每个layer中的各项值,有了属性,比如delta,error,after_activation
         output = self.feed_forward(X)
         for i in reversed(range(len(self._layers))):
             # 反向循环
@@ -106,16 +100,17 @@ class NeuralNetwork:
             # 如果是输出层
             if layer == self._layers[-1]:
                 # 计算误差
-                layer.error = y - output
+                layer.error = layer.after_activation - y # 对于输出层来说,output = 输出层.after_activation
                 # 计算 2 分类任务的均方差的导数
                 # 关键步骤：计算最后一层的 delta，参考输出层的梯度公式
                 # 参考书本160页的，求delta公式
-                layer.delta = layer.error * layer.apply_activation_derivative(output)
+                layer.delta = layer.error * layer.apply_activation_derivative(layer.after_activation)
 
             else:
                 # 如果是隐藏层
                 next_layer = self._layers[i + 1]
                 # 得到下一层对象
+                # 注意,这里dot是 weights@delta
                 layer.error = np.dot(next_layer.weights, next_layer.delta)
                 # 关键步骤：计算隐藏层的 delta，参考隐藏层的梯度公式
                 # 参考书本161页的求delta公式
@@ -125,9 +120,10 @@ class NeuralNetwork:
             layer = self._layers[i]
             # o_i 为上一网络层的输出
             # np.atleast_2d 支持将输入数据直接视为 2 维
+            # # 因为after_activation 可能是单个,也可能是好多个
             o_i = np.atleast_2d(X if i == 0 else self._layers[i - 1].after_activation)
-            # 梯度下降算法，delta 是公式中的负数，故这里用加号
-            layer.weights += layer.delta * o_i.T * learning_rate
+            # 梯度下降算法
+            layer.weights -= layer.delta * o_i.T * learning_rate
 
     def train(self, X_train, X_test, y_train, y_test, learning_rate, max_epochs):
         # 网络训练函数
@@ -141,7 +137,7 @@ class NeuralNetwork:
                 # 一次训练一个样本
                 self.backpropagation(X_train[j], y_onehot[j], learning_rate)
                 # 每100个样本打印一次
-                if j % 100 == 0:
+                if j % 1000 == 0:
                     # 打印出 MSE Loss
                     mse = np.mean(np.square(y_onehot - self.feed_forward(X_train)))
                     mses.append(mse)
