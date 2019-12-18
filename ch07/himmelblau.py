@@ -33,7 +33,7 @@ plt.show()
 # x = tf.constant([1., 0.])
 # x = tf.constant([-4., 0.])
 x = tf.constant([-2., 2.])
-
+# 输入Tape计算的,一定要是tensor,不是tensor也要转换成tensor
 for step in range(200):  # 循环优化
     with tf.GradientTape() as tape:  # 梯度跟踪
         tape.watch([x])  # 记录梯度
