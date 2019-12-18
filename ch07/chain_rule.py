@@ -14,7 +14,7 @@ with tf.GradientTape(persistent=True) as tape:
     y1 = x*tf.sin(w1)+ x**b1
     y2 = y1*tf.sin(w2)+ y1*b2
 
-# 这是gradient返回的结果,是个list 索引0是他的值
+# 这是gradient返回的结果,是个list 因为会有很多个梯度.这里只有一个,因此0可就是我们要求的这个
 # [<tf.Tensor: id=121, shape=(), dtype=float32, numpy=-0.7945481>]
 dy2_dw1 = tape.gradient(y2,[w1])[0]
 dy2_dy1 = tape.gradient(y2,[y1])[0]
