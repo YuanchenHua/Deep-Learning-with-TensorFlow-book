@@ -15,7 +15,7 @@ x_min =-2
 x_max =3
 y_min =-2
 y_max =3
-OUTPUT_DIR = '.'
+OUTPUT_DIR = './ch09/result'
 
 # 从 moon 分布中随机采样 1000 个点
 X, y = make_moons(n_samples = N_SAMPLES, noise=0.25, random_state=100)
