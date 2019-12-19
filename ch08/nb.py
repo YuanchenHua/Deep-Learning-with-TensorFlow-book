@@ -86,11 +86,18 @@ network.compile(optimizer=optimizers.Adam(lr=0.01),
 #%%
 # 指定训练集为db，验证集为val_db,训练5个epochs，每2个epoch验证一次
 # fit的时候输入  训练数据,epochs,验证数据,验证频率
-# 返回一个history,记录信息
+# 返回一个history,记录各种信息
 # 这里validation_data 采用的是test_data,理论上来说不可以,validation应该来自于部分train,会造成一定的误解
 history = network.fit(train_db, epochs=5, validation_data=val_db, validation_freq=2)
+# %%
+# 预测
+x,y = next(iter(val_db))
+print('predict x:', x.shape)
+out = network.predict(x) # 模型预测
+print(out)
 
-
+# 可循环测试完 db 数 据集上所有样本，并打印出性能指标
+network.evaluate(val_db)
 #%%
 history.history # 打印训练记录
 
