@@ -53,7 +53,7 @@ dataset['Europe'] = (origin == 2)*1.0
 dataset['Japan'] = (origin == 3)*1.0
 dataset.tail()
 
-
+# %%
 # 切分为训练集和测试集
 train_dataset = dataset.sample(frac=0.8, random_state=0)
 test_dataset = dataset.drop(train_dataset.index)
