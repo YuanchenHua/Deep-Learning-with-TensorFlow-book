@@ -64,7 +64,9 @@ for i in range(20):
     with summary_writer.as_default():
         # 写入测试Loss,不同的名字，只是为了区分数据，可以是loss，可以是acc，可以是任何字符串
         tf.summary.scalar('loss', float(loss_meter.result()),step = i)
+   
     print(loss_meter.result())
+    # 清零统计信息，以便下一轮统计的开始
     loss_meter.reset_states()
 
 
