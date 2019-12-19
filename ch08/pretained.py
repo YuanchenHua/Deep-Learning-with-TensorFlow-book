@@ -6,11 +6,12 @@ from    tensorflow.keras import datasets, layers, optimizers, Sequential, metric
 #%%
 # 加载预训练网络模型，并去掉最后一层
 resnet = keras.applications.ResNet50(weights='imagenet',include_top=False)
+# summary()是个方法
 resnet.summary()
 # 测试网络的输出
 x = tf.random.normal([4,224,224,3])
 out = resnet(x)
-out.shape
+print(out.shape)
 
 # 新建池化层
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
@@ -27,9 +28,12 @@ out = fc(x)
 print(out.shape)
 #%%
 # 重新包裹成我们的网络模型
+# Sequential S大写,第一个参数为list
 mynet = Sequential([resnet, global_average_layer, fc])
 mynet.summary()
 #%%
+# model可以指定trainable
+# 变量也可以指定trainable
 resnet.trainable = False
 mynet.summary()
 
