@@ -6,9 +6,14 @@ import  tensorflow as tf
 from    tensorflow import keras
 from    tensorflow.keras import layers, optimizers, datasets, Sequential
 
-
-
 #%% 
+'''
+其中 padding 参数的设置格式为：`padding=[[0,0],[上,下],[左,右],[0,0]]`  
+例如，上下左右各 padding 一个单位，则 `padding=[[0,0],[1,1],[1,1],[0,0]]`  
+通过设置参数 `padding='SAME'，strides=1` 可以直接得到输入、输出同大小的卷积层  
+当s>1时，设置 padding='SAME'将使得输出高、宽将成为原来的 1/s
+
+'''
 x = tf.random.normal([2,5,5,3]) # 模拟输入，3通道，高宽为5
 # 需要根据[k,k,cin,cout]格式创建，4个卷积核
 w = tf.random.normal([3,3,3,4]) 
@@ -34,21 +39,23 @@ out = tf.nn.conv2d(x,w,strides=1,padding='SAME')
 
 # %%
 x = tf.random.normal([2,5,5,3])
+# ################### 长,宽,输入层数,核数(即输出层数)
 w = tf.random.normal([3,3,3,4])
 # 高宽按3倍减少
+# ############     输入,核形状(即w),步长,padding  
 out = tf.nn.conv2d(x,w,strides=3,padding='SAME')
 print(out.shape)
 
-
-# %%
 # 根据[cout]格式创建偏置向量
 b = tf.zeros([4])
 # 在卷积输出上叠加偏置向量，它会自动broadcasting为[b,h',w',cout]
+#           bias
 out = out + b
 
 
 # %%
 # 创建卷积层类
+# ##################  核数,核形状          ,步长          ,padding
 layer = layers.Conv2D(4,kernel_size=(3,4),strides=(2,1),padding='SAME')
 out = layer(x) # 前向计算
 out.shape
@@ -94,42 +101,44 @@ criteon = losses.CategoricalCrossentropy(from_logits=True)
 optimizer = optimizers.Adam()
 
 # %%
-    # 构建梯度记录环境
-    with tf.GradientTape() as tape: 
-        # 插入通道维度，=>[b,28,28,1]
-        print(x.shape)
-        x = tf.expand_dims(x,axis=3)
-        # 前向计算，获得10类别的预测分布，[b, 784] => [b, 10]
-        out = network(x)
-        # 真实标签one-hot编码，[b] => [b, 10]
-        y_onehot = tf.one_hot(y, depth=10)
-        # 计算交叉熵损失函数，标量
-        loss = criteon(y_onehot, out)
-    # 自动计算梯度
-    grads = tape.gradient(loss, network.trainable_variables)
-    # 自动更新参数
-    optimizer.apply_gradients(zip(grads, network.trainable_variables))
+# 构建梯度记录环境
+with tf.GradientTape() as tape:
+    print(x.shape) 
+    # x的shape为 n,28,28 为输入batch大小,即几张图片
+    # 因为不是RGB,只有一个颜色,所以少了RGB纬度,最后面加上去
+    # 插入通道维度，=>[b,28,28,1]
+    x = tf.expand_dims(x,axis=3)
+    # 前向计算，获得10类别的预测分布，[b, 784] => [b, 10]
+    out = network(x)
+    # 真实标签one-hot编码，[b] => [b, 10]
+    y_onehot = tf.one_hot(y, depth=10)
+    # 计算交叉熵损失函数，标量
+    loss = criteon(y_onehot, out)
+# 自动计算梯度
+grads = tape.gradient(loss, network.trainable_variables)
+# 自动更新参数
+optimizer.apply_gradients(zip(grads, network.trainable_variables))
 
 
 # %%
-        # 记录预测正确的数量，总样本数量
-        correct, total = 0,0
-        for x,y in zip(x_test,y_test): # 遍历所有训练集样本
-            # 插入通道维度，=>[b,28,28,1]
-            x = tf.expand_dims(x,axis=2)
-            x = tf.expand_dims(x, axis=0)
-            # 前向计算，获得10类别的预测分布，[b, 784] => [b, 10]
-            out = network(x)
-            # 真实的流程时先经过softmax，再argmax
-            # 但是由于softmax不改变元素的大小相对关系，故省去
-            pred = tf.argmax(out, axis=-1)  
-            y = tf.cast(y, tf.int64)
-            # 统计预测正确数量
-            correct += float(tf.reduce_sum(tf.cast(tf.equal(pred, y),tf.float32)))
-            # 统计预测样本总数
-            total += x.shape[0]
-        # 计算准确率
-        print('test acc:', correct/total)
+# 记录预测正确的数量，总样本数量
+correct, total = 0,0
+for x,y in zip(x_test,y_test): # 遍历所有训练集样本
+    # 插入通道维度，=>[b,28,28,1]
+    x = tf.expand_dims(x,axis=2)
+    x = tf.expand_dims(x, axis=0)
+    # 前向计算，获得10类别的预测分布，[b, 784] => [b, 10]
+    out = network(x)
+    # 真实的流程时先经过softmax，再argmax
+    # 但是由于softmax不改变元素的大小相对关系，故省去
+    pred = tf.argmax(out, axis=-1)  
+    y = tf.cast(y, tf.int64)
+    # 统计预测正确数量
+    correct += float(tf.reduce_sum(tf.cast(tf.equal(pred, y),tf.float32)))
+    # 统计预测样本总数
+    total += x.shape[0]
+# 计算准确率
+print('test acc:', correct/total)
 
 
 # %%
@@ -143,7 +152,7 @@ ub
 
 
 # %%
-# 创建BN层
+# 创建BN层,用于手动创建网络的时候
 layer=layers.BatchNormalization()
 
 # %%
@@ -168,24 +177,24 @@ network = Sequential([ # 网络容器
 
 
 # %%
-    with tf.GradientTape() as tape: 
-        # 插入通道维度
-        x = tf.expand_dims(x,axis=3)
-        # 前向计算，设置计算模式，[b, 784] => [b, 10]
-        out = network(x, training=True)
+with tf.GradientTape() as tape: 
+    # 插入通道维度
+    x = tf.expand_dims(x,axis=3)
+    # 前向计算，设置计算模式，[b, 784] => [b, 10]
+    out = network(x, training=True)
 
 
 # %%
-        for x,y in db_test: # 遍历测试集
-            # 插入通道维度
-            x = tf.expand_dims(x,axis=3)
-            # 前向计算，测试模式
-            out = network(x, training=False)
+for x,y in db_test: # 遍历测试集
+    # 插入通道维度
+    x = tf.expand_dims(x,axis=3)
+    # 前向计算，测试模式
+    out = network(x, training=False)
 
 
 # %%
 def preprocess(x, y):
-    # [0~1]
+    # [-1~1]
     x = 2*tf.cast(x, dtype=tf.float32) / 255.-1
     y = tf.cast(y, dtype=tf.int32)
     return x,y
@@ -296,14 +305,7 @@ out
 xx = tf.nn.conv2d_transpose(out, w, strides=2, 
     padding='VALID',
     output_shape=[1,5,5,1])
-
-
-<tf.Tensor: id=117, shape=(5, 5), dtype=float32, numpy=
-array([[   67.,  -134.,   278.,  -154.,   231.],
-       [ -268.,   335.,  -710.,   385.,  -462.],
-       [  586.,  -770.,  1620.,  -870.,  1074.],
-       [ -468.,   585., -1210.,   635.,  -762.],
-       [  819.,  -936.,  1942., -1016.,  1143.]], dtype=float32)>
+xx
 
 
 # %%
@@ -311,12 +313,6 @@ x = tf.random.normal([1,6,6,1])
 # 6x6的输入经过普通卷积
 out = tf.nn.conv2d(x,w,strides=2,padding='VALID')
 out
-<tf.Tensor: id=21, shape=(1, 2, 2, 1), dtype=float32, numpy=
-array([[[[ 20.438847 ],
-         [ 19.160788 ]],
-
-        [[  0.8098897],
-         [-28.30303  ]]]], dtype=float32)>
 # %%
 # 恢复出6x6大小
 xx = tf.nn.conv2d_transpose(out, w, strides=2, 
@@ -337,6 +333,7 @@ class BasicBlock(layers.Layer):
     def __init__(self, filter_num, stride=1):
         super(BasicBlock, self).__init__()
         # f(x)包含了2个普通卷积层，创建卷积层1
+        # filter_num是卷积核个数,也就是输出结果的通道数
         self.conv1 = layers.Conv2D(filter_num, (3, 3), strides=stride, padding='same')
         self.bn1 = layers.BatchNormalization()
         self.relu = layers.Activation('relu')
@@ -348,6 +345,7 @@ class BasicBlock(layers.Layer):
             self.downsample = Sequential()
             self.downsample.add(layers.Conv2D(filter_num, (1, 1), strides=stride))
         else: # 否则，直接连接
+            # 这里就是 self.downsample 输入什么就输出什么
             self.downsample = lambda x:x
 
 
