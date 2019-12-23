@@ -1,4 +1,3 @@
-#%%
 import  os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
@@ -38,6 +37,7 @@ out = tf.nn.conv2d(x,w,strides=1,padding='SAME')
 
 
 # %%
+# ################## 个数,长,宽,通道
 x = tf.random.normal([2,5,5,3])
 # ################### 长,宽,输入层数,核数(即输出层数)
 w = tf.random.normal([3,3,3,4])

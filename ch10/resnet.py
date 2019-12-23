@@ -83,6 +83,7 @@ class ResNet(keras.Model):
         # 辅助函数，堆叠filter_num个BasicBlock
         res_blocks = Sequential()
         # 只有第一个BasicBlock的步长可能不为1，实现下采样
+        # 每一个block之中,有好多个BasicBlock,一个block保持一个大小,因此后面的步长都为1
         res_blocks.add(BasicBlock(filter_num, stride))
 
         for _ in range(1, blocks):#其他BasicBlock步长都为1
