@@ -146,9 +146,12 @@ print('test acc:', correct/total)
 x=tf.random.normal([100,32,32,3])
 # 将其他维度合并，仅保留通道维度
 x=tf.reshape(x,[-1,3])
-# 计算其他维度的均值
-ub=tf.reduce_mean(x,axis=0)
-ub
+# 计算其他维度的均值,3个通道数，则有 3 个均值产生
+ub=tf.math.reduce_mean(x,axis=0)
+print(ub)
+# 计算其他纬度的方差
+sigmab = tf.math.reduce_variance(x,axis=0)
+print(sigmab)
 
 
 # %%
@@ -177,6 +180,7 @@ network = Sequential([ # 网络容器
 
 
 # %%
+# 训练的时候 training=True ,要训练BN层
 with tf.GradientTape() as tape: 
     # 插入通道维度
     x = tf.expand_dims(x,axis=3)
@@ -185,6 +189,7 @@ with tf.GradientTape() as tape:
 
 
 # %%
+# 测试的时候,training=False 免得BN层出错
 for x,y in db_test: # 遍历测试集
     # 插入通道维度
     x = tf.expand_dims(x,axis=3)

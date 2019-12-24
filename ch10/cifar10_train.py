@@ -7,26 +7,31 @@ tf.random.set_seed(2345)
 
 conv_layers = [ # 5 units of conv + max pooling
     # unit 1
+    # ====>  b,16,16,64
     layers.Conv2D(64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.Conv2D(64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='same'),
 
     # unit 2
+    # ====>  b,8,8,128
     layers.Conv2D(128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.Conv2D(128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='same'),
 
     # unit 3
+    # ====>  b,4,4,256
     layers.Conv2D(256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.Conv2D(256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='same'),
 
     # unit 4
+    # ====>  b,2,2,512
     layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='same'),
 
     # unit 5
+    # ====>  b,1,1,512
     layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
     layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='same')
@@ -86,6 +91,7 @@ def main():
             with tf.GradientTape() as tape:
                 # [b, 32, 32, 3] => [b, 1, 1, 512]
                 out = conv_net(x)
+                # 打平这一步在这里嗷
                 # flatten, => [b, 512]
                 out = tf.reshape(out, [-1, 512])
                 # [b, 512] => [b, 10]
