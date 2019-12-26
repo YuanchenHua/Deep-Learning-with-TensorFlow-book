@@ -58,19 +58,25 @@ print('x_test shape:', x_test.shape)
 #%%
 
 class MyRNN(keras.Model):
-    # Cell方式构建多层网络
+    # layer方式构建多层网络
     def __init__(self, units):
         super(MyRNN, self).__init__() 
         # 词向量编码 [b, 80] => [b, 80, 100]
+        # 构建embedding层 总词数,词向量位数,单词数
+        # 参数顺序,与上面 [b, 80, 100] 不同
+        # 可以直接 self.embedding = layers.Embedding(total_words, embedding_len)
+        # 因为不是直接连着全连接层,所以不需要input_length=max_review_len 这个参数                       
         self.embedding = layers.Embedding(total_words, embedding_len,
                                           input_length=max_review_len)
         # 构建RNN
+        # [b, 80, 100] => [b, 64] 这里的64 就是参数中的 units,就是h的位数
         self.rnn = keras.Sequential([
+            # 先跑完一层,在跑另一层,因此 return_sequences=True
             layers.SimpleRNN(units, dropout=0.5, return_sequences=True),
             layers.SimpleRNN(units, dropout=0.5)
         ])
-        # 构建分类网络，用于将CELL的输出特征进行分类，2分类
-        # [b, 80, 100] => [b, 64] => [b, 1]
+        # 构建分类网络，用于将rnn的输出特征进行分类，2分类
+        #  [b, 64] => [b, 1]
         self.outlayer = Sequential([
         	layers.Dense(32),
         	layers.Dropout(rate=0.5),
@@ -78,14 +84,19 @@ class MyRNN(keras.Model):
         	layers.Dense(1)])
 
     def call(self, inputs, training=None):
+        # 输入
         x = inputs # [b, 80]
+        # embedding
         # embedding: [b, 80] => [b, 80, 100]
         x = self.embedding(x)
+        # rnn处理
         # rnn cell compute,[b, 80, 100] => [b, 64]
         x = self.rnn(x)
+        # 全连接层处理
         # 末层最后一个输出作为分类网络的输入: [b, 64] => [b, 1]
         x = self.outlayer(x,training)
         # p(y is pos|x)
+        # 变成0~1
         prob = tf.sigmoid(x)
 
         return prob
@@ -100,6 +111,7 @@ def main():
                   loss = losses.BinaryCrossentropy(),
                   metrics=['accuracy'])
     # 训练和验证
+    # 这里有错误的,验证不能拿测试的数据
     model.fit(db_train, epochs=epochs, validation_data=db_test)
     # 测试
     model.evaluate(db_test)

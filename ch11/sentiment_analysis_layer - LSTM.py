@@ -58,19 +58,20 @@ print('x_test shape:', x_test.shape)
 #%%
 
 class MyRNN(keras.Model):
-    # Cell方式构建多层网络
+    # layers方式构建多层网络
     def __init__(self, units):
         super(MyRNN, self).__init__() 
         # 词向量编码 [b, 80] => [b, 80, 100]
         self.embedding = layers.Embedding(total_words, embedding_len,
                                           input_length=max_review_len)
         # 构建RNN
+        # [b, 80, 100] => [b, 64]
         self.rnn = keras.Sequential([
             layers.LSTM(units, dropout=0.5, return_sequences=True),
             layers.LSTM(units, dropout=0.5)
         ])
-        # 构建分类网络，用于将CELL的输出特征进行分类，2分类
-        # [b, 80, 100] => [b, 64] => [b, 1]
+        # 构建分类网络，用于将layers的输出特征进行分类，2分类
+        # [b, 64] => [b, 1]
         self.outlayer = Sequential([
         	layers.Dense(32),
         	layers.Dropout(rate=0.5),
@@ -100,6 +101,7 @@ def main():
                   loss = losses.BinaryCrossentropy(),
                   metrics=['accuracy'])
     # 训练和验证
+    # 这里有错误的,验证不能拿测试的数据
     model.fit(db_train, epochs=epochs, validation_data=db_test)
     # 测试
     model.evaluate(db_test)

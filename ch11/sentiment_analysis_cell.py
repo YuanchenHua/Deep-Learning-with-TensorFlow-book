@@ -68,10 +68,11 @@ class MyRNN(keras.Model):
         self.embedding = layers.Embedding(total_words, embedding_len,
                                           input_length=max_review_len)
         # 构建2个Cell
+        # [b, 80, 100] => [b, 64]
         self.rnn_cell0 = layers.SimpleRNNCell(units, dropout=0.5)
         self.rnn_cell1 = layers.SimpleRNNCell(units, dropout=0.5)
         # 构建分类网络，用于将CELL的输出特征进行分类，2分类
-        # [b, 80, 100] => [b, 64] => [b, 1]
+        # [b, 64] => [b, 1]
         self.outlayer = Sequential([
         	layers.Dense(units),
         	layers.Dropout(rate=0.5),
