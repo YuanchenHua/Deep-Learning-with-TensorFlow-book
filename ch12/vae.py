@@ -116,6 +116,7 @@ for epoch in range(1000):
 
             # compute kl divergence (mu, var) ~ N (0, 1)
             # https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
+            # P311
             kl_div = -0.5 * (log_var + 1 - mu**2 - tf.exp(log_var))
             kl_div = tf.reduce_sum(kl_div) / x.shape[0]
 
@@ -130,6 +131,7 @@ for epoch in range(1000):
 
 
     # evaluation
+    # 根据正态分布,生成图片
     z = tf.random.normal((batchsz, z_dim))
     logits = model.decoder(z)
     x_hat = tf.sigmoid(logits)
@@ -137,6 +139,7 @@ for epoch in range(1000):
     x_hat = x_hat.astype(np.uint8)
     save_images(x_hat, 'vae_images/sampled_epoch%d.png'%epoch)
 
+    # 根据原有图片,变换图片
     x = next(iter(test_db))
     x = tf.reshape(x, [-1, 784])
     x_hat_logits, _, _ = model(x)
